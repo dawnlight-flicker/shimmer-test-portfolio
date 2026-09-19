@@ -30,7 +30,11 @@
 
 ## 第三部分：项目演示
 
-（视频链接，可在GitHub上添加）
+<iframe src="https://player.bilibili.com/player.html?bvid=你的视频ID" 
+        scrolling="no" border="0" frameborder="no" 
+        framespacing="0" allowfullscreen="true" 
+        width="100%" height="400">
+</iframe>
 
 ## 第四部分：测试
 
