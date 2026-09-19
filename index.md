@@ -30,7 +30,7 @@
 
 ## 第三部分：项目演示
 
-<iframe src="https://www.bilibili.com/video/BV1hGe46UE7H/?share_source=copy_web&vd_source=c269206b32c0950864bed13910596940" 
+<iframe src="<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=117296513222884&bvid=BV1hGe46UE7H&cid=42024042939&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>" 
         scrolling="no" border="0" frameborder="no" 
         framespacing="0" allowfullscreen="true" 
         width="100%" height="400">
