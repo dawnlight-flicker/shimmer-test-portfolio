@@ -1,0 +1,7 @@
+remote_theme: pages-themes/midnight@v0.2.0
+plugins:
+- jekyll-remote-theme
+
+title: 计划表 Shimmer
+tagline: 一个纯本地的学习管理工具
+description: 测试作品集
