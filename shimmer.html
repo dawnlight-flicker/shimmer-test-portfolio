@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>拾光签 — 低保真线框总览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #d8d8d8;
+    padding: 24px;
+    color: #222;
+    font-size: 12px;
+  }
+
+  .page-title {
+    max-width: 1800px;
+    margin: 0 auto 24px;
+    background: #fff;
+    border: 2px solid #222;
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+  .page-title h1 { font-size: 18px; margin-bottom: 6px; }
+  .page-title p { font-size: 12px; color: #555; line-height: 1.7; }
+  .page-title code {
+    background: #eee;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+
+  /* 分组 */
+  .group {
+    max-width: 1800px;
+    margin: 0 auto 32px;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #222;
+  }
+  .group-num {
+    background: #222;
+    color: #fff;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+  .group-title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .group-desc {
+    font-size: 11px;
+    color: #666;
+    margin-left: auto;
+  }
+
+  /* 卡片网格 */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 280px);
+    gap: 16px;
+  }
+
+  /* 单个卡片（一屏） */
+  .card {
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 卡片头部：页面名称 + 流程位置 */
+  .card-head {
+    background: #222;
+    color: #fff;
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+  }
+  .card-name { font-weight: 700; }
+  .card-pos {
+    font-size: 10px;
+    background: #fff;
+    color: #222;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+  /* 窗口模拟 */
+  .screen {
+    height: 340px;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #fafafa;
+  }
+
+  /* 通用窗口元素 */
+  .win-titlebar {
+    height: 18px;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .win-titlebar span {
+    width: 7px; height: 7px; border-radius: 50%; background: #999;
+  }
+  .win-nav {
+    height: 24px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 10px;
+    color: #555;
+    flex-shrink: 0;
+  }
+  .win-nav .brand { font-weight: 700; font-size: 11px; }
+  .win-nav .icons { display: flex; gap: 4px; }
+  .nav-i {
+    width: 18px; height: 18px;
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    background: #f5f5f5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+  .win-body {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    padding: 8px;
+  }
+
+  /* 日历月视图 */
+  .cal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+  }
+  .cal-head .m { font-weight: 700; font-size: 11px; }
+  .cal-head .ctrls { display: flex; gap: 3px; }
+  .chip {
+    padding: 1px 6px;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    font-size: 9px;
+    background: #fafafa;
+    color: #555;
+  }
+  .chip.on { background: #222; color: #fff; border-color: #222; }
+
+  .grid-m {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .wd { text-align: center; font-size: 8px; color: #999; padding: 2px 0; }
+  .cell {
+    aspect-ratio: 1;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    background: #fdfdfd;
+    position: relative;
+  }
+  .cell.other { border-color: transparent; color: #ccc; }
+  .cell.today { border: 1.5px solid #222; font-weight: 700; }
+  .cell .dot {
+    position: absolute;
+    bottom: 1px;
+    width: 3px; height: 3px;
+    background: #555;
+    border-radius: 50%;
+  }
+
+  /* 周视图 */
+  .wk-wrap { display: flex; height: 100%; font-size: 9px; }
+  .wk-time { width: 30px; flex-shrink: 0; border-right: 1px solid #eee; }
+  .wk-time .h { height: 22px; color: #999; text-align: right; padding-right: 3px; border-bottom: 1px solid #f5f5f5; }
+  .wk-days { flex: 1; display: flex; }
+  .wk-day { flex: 1; border-right: 1px solid #f5f5f5; position: relative; }
+  .wk-day .dh { height: 20px; text-align: center; font-size: 8px; background: #fafafa; border-bottom: 1px solid #eee; }
+  .wk-day .dh .d { font-weight: 700; font-size: 9px; }
+  .evt {
+    position: absolute;
+    left: 1px; right: 1px;
+    background: #d0d0d0;
+    border: 1px solid #999;
+    border-radius: 2px;
+    font-size: 7px;
+    padding: 1px 2px;
+    overflow: hidden;
+  }
+
+  /* 待办面板 */
+  .todo-p {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 130px;
+    background: #fff;
+    border-left: 1.5px solid #222;
+    display: flex;
+    flex-direction: column;
+    font-size: 9px;
+  }
+  .todo-p .th {
+    padding: 5px 7px;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+  }
+  .todo-p .ta {
+    display: flex;
+    gap: 3px;
+    padding: 4px 5px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .todo-p .ta input {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    padding: 2px 4px;
+    font-size: 8px;
+  }
+  .todo-p .ta button {
+    width: 16px; height: 16px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    border-radius: 2px;
+    font-size: 8px;
+  }
+  .todo-p .tl { flex: 1; overflow: hidden; }
+  .ti {
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 4px;
+    font-size: 9px;
+  }
+  .ti .ck { width: 8px; height: 8px; border: 1px solid #999; border-radius: 2px; }
+  .ti .tg {
+    margin-left: auto;
+    width: 12px; height: 12px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px;
+    background: #fafafa;
+  }
+  .ti .tg.on { background: #222; color: #fff; border-color: #222; }
+  .todo-p .tf {
+    padding: 5px 7px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* 弹窗 */
+  .mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dlg {
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 5px;
+    padding: 10px;
+    width: 78%;
+    font-size: 10px;
+  }
+  .dlg h4 { font-size: 11px; text-align: center; margin-bottom: 8px; }
+  .fr {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 9px;
+  }
+  .fr .l { color: #888; }
+  .dlg-actions { display: flex; justify-content: flex-end; gap: 4px; margin-top: 8px; }
+  .b {
+    padding: 2px 8px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+  .b.p { background: #222; color: #fff; border-color: #222; }
+
+  /* 杂物堆 */
+  .inbox {
+    position: absolute;
+    inset: 0;
+    background: #f5eeff;
+    display: flex;
+    flex-direction: column;
+  }
+  .inbox .it {
+    padding: 5px 8px;
+    border-bottom: 1px solid #e8d5f0;
+    background: #fdf5e6;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b4a8a;
+  }
+  .inbox .ip {
+    display: flex;
+    gap: 4px;
+    padding: 5px 6px;
+    background: #fdf5e6;
+    border-bottom: 1px solid #e8d5f0;
+  }
+  .inbox .ip input {
+    flex: 1;
+    border: 1px solid #d5c0e8;
+    border-radius: 2px;
+    padding: 2px 4px;
+    font-size: 8px;
+  }
+  .inbox .ip button {
+    padding: 0 6px;
+    border: 1px solid #9C7BC8;
+    background: #fff;
+    color: #9C7BC8;
+    border-radius: 2px;
+    font-size: 8px;
+  }
+  .inbox .il { flex: 1; padding: 5px; overflow: hidden; }
+  .ic {
+    background: #fdf5e6;
+    border: 1px solid #e8d5f0;
+    border-radius: 4px;
+    padding: 5px 7px;
+    margin-bottom: 5px;
+    font-size: 9px;
+    color: #4a3b2f;
+  }
+  .ic .im {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    color: #9C7BC8;
+    margin-bottom: 3px;
+  }
+
+  /* 右键菜单 */
+  .ctx {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 3px;
+    font-size: 9px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .ctx div { padding: 4px 12px; }
+  .ctx div.d { color: #c00; }
+
+  /* 空状态 / 加载 / 失败 */
+  .empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 10px;
+    gap: 6px;
+    text-align: center;
+  }
+  .empty .icon { font-size: 28px; opacity: 0.4; }
+  .loading {
+    width: 20px; height: 20px;
+    border: 2px solid #ddd;
+    border-top-color: #555;
+    border-radius: 50%;
+  }
+  .err-icon {
+    width: 28px; height: 28px;
+    border: 2px solid #999;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #999;
+  }
+
+  /* 加载页 */
+  .splash {
+    position: absolute;
+    inset: 0;
+    background: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    gap: 10px;
+  }
+  .splash .logo-big {
+    width: 60px; height: 60px;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .splash .name { font-size: 14px; font-weight: 700; }
+  .splash .tag { font-size: 10px; color: #ccc; }
+  .progress {
+    width: 100px;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress .bar {
+    height: 100%;
+    width: 60%;
+    background: #fff;
+  }
+
+  /* 登录 */
+  .login-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 10px;
+  }
+  .login-card h4 { font-size: 12px; text-align: center; margin-bottom: 10px; }
+  .inp {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px 8px;
+    margin-bottom: 8px;
+    color: #888;
+    font-size: 9px;
+    background: #fafafa;
+  }
+  .btn-l {
+    background: #222;
+    color: #fff;
+    text-align: center;
+    padding: 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* 卡片底部说明 */
+  .card-info {
+    padding: 8px 10px;
+    font-size: 10px;
+    line-height: 1.6;
+    color: #444;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .card-info .row {
+    display: flex;
+    gap: 6px;
+  }
+  .card-info .row .k {
+    color: #888;
+    flex-shrink: 0;
+    width: 52px;
+  }
+  .card-info .row .v { flex: 1; }
+  .card-info .todo-flag {
+    display: inline-block;
+    background: #ffe082;
+    color: #6b4a00;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>拾光签 / Shimmer — 低保真线框总览</h1>
+  <p>
+    按用户真实使用顺序平铺所有页面与状态。每屏标注：<b>页面名称</b>、<b>流程位置</b>、<b>可执行操作</b>、<b>操作后去向</b>。<br>
+    只用黑白灰、基础框线、图片占位块，仅表达信息层级、核心文案、按钮位置与页面状态。
+    PRD 中未明确说明的地方，标注为 <span class="todo-flag">待确认</span>。
+  </p>
+</div>
+
+
+<!-- ==================== 第一组：启动与登录 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">1</div>
+    <div class="group-title">启动与登录</div>
+    <div class="group-desc">用户第一次打开 App 到进入主界面的流程</div>
+  </div>
+
+  <div class="cards">
+
+    <!-- 1.1 启动加载页 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.1 启动加载页</span>
+        <span class="card-pos">第 1 步</span>
+      </div>
+      <div class="screen">
+        <div class="splash">
+          <div class="logo-big">拾</div>
+          <div class="name">拾光签</div>
+          <div class="tag">一个安静的学习搭子</div>
+          <div class="progress"><div class="bar"></div></div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">无（自动）</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加载完成后 → 1.2 登录/注册页</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">加载本地资源</span></div>
+      </div>
+    </div>
+
+    <!-- 1.2 登录/注册页 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.2 登录 / 注册页</span>
+        <span class="card-pos">第 2 步</span>
+      </div>
+      <div class="screen">
+        <div class="login-card">
+          <h4>登录 / 注册</h4>
+          <div class="inp">邮箱</div>
+          <div class="inp">密码</div>
+          <div class="btn-l">登录</div>
+          <div style="text-align:center;font-size:9px;color:#888;margin-top:6px;">没有账号？去注册</div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">输入邮箱密码 / 切换注册 / 点登录</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">登录成功 → 2.1 主日历月视图</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">登录失败 → 1.3 登录失败状态</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">纯本地，账号仅用于区分用户</span></div>
+      </div>
+    </div>
+
+    <!-- 1.3 登录失败状态 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.3 登录失败状态</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="login-card">
+          <h4>登录 / 注册</h4>
+          <div class="inp">邮箱</div>
+          <div class="inp">密码</div>
+          <div style="font-size:9px;color:#c00;text-align:center;margin:4px 0;">邮箱或密码错误</div>
+          <div class="btn-l">登录</div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">修改后重新登录</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">成功后 → 2.1 主日历月视图</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">登录失败提示文案</span> <span class="todo-flag">待确认</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第二组：主日历 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">2</div>
+    <div class="group-title">主日历</div>
+    <div class="group-desc">用户登录后进入的主界面，查看/切换月周视图</div>
+  </div>
+
+  <div class="cards">
+
+    <!-- 2.1 主日历 - 月视图 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.1 主日历 · 月视图</span>
+        <span class="card-pos">第 3 步</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons">
+            <div class="nav-i">☰</div>
+            <div class="nav-i">📥</div>
+            <div class="nav-i">⏻</div>
+          </div>
+        </div>
+        <div class="win-body">
+          <div class="cal-head">
+            <div class="m">2026年 10月</div>
+            <div class="ctrls">
+              <span class="chip">‹</span>
+              <span class="chip">›</span>
+              <span class="chip on">月</span>
+              <span class="chip">周</span>
+            </div>
+          </div>
+          <div class="grid-m">
+            <div class="wd">一</div><div class="wd">二</div><div class="wd">三</div><div class="wd">四</div><div class="wd">五</div><div class="wd">六</div><div class="wd">日</div>
+            <div class="cell other"></div><div class="cell other"></div><div class="cell other"></div><div class="cell">1</div><div class="cell today">2</div><div class="cell">3</div><div class="cell">4</div>
+            <div class="cell">5<div class="dot"></div></div><div class="cell">6</div><div class="cell">7</div><div class="cell">8<div class="dot"></div></div><div class="cell">9</div><div class="cell">10</div><div class="cell">11</div>
+            <div class="cell">12<div class="dot"></div></div><div class="cell">13</div><div class="cell">14</div><div class="cell">15<div class="dot"></div></div><div class="cell">16</div><div class="cell">17</div><div class="cell">18</div>
+            <div class="cell">19</div><div class="cell">20<div class="dot"></div></div><div class="cell">21</div><div class="cell">22</div><div class="cell">23</div><div class="cell">24</div><div class="cell">25<div class="dot"></div></div>
+            <div class="cell">26</div><div class="cell">27</div><div class="cell">28</div><div class="cell">29</div><div class="cell">30</div><div class="cell">31</div><div class="cell other"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点日期格 / 切换月周 / 点右上待办 / 点杂物堆</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点日期格 → 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点「周」→ 2.2 周视图</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点☰ → 4.1 待办面板</span></div>
+      </div>
+    </div>
+
+    <!-- 2.2 主日历 - 周视图 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.2 主日历 · 周视图</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons">
+            <div class="nav-i">☰</div>
+            <div class="nav-i">📥</div>
+            <div class="nav-i">⏻</div>
+          </div>
+        </div>
+        <div class="win-body">
+          <div class="cal-head">
+            <div class="m">10/5 - 10/11</div>
+            <div class="ctrls">
+              <span class="chip">‹</span>
+              <span class="chip">›</span>
+              <span class="chip">月</span>
+              <span class="chip on">周</span>
+            </div>
+          </div>
+          <div class="wk-wrap" style="height:calc(100% - 26px);">
+            <div class="wk-time">
+              <div class="h">07</div><div class="h">08</div><div class="h">09</div><div class="h">10</div><div class="h">11</div><div class="h">12</div><div class="h">13</div><div class="h">14</div><div class="h">15</div>
+            </div>
+            <div class="wk-days">
+              <div class="wk-day"><div class="dh"><div class="d">5</div><div>一</div></div>
+                <div class="evt" style="top:34px;height:24px;">复习方剂学</div>
+                <div class="evt" style="top:120px;height:30px;">刷题</div>
+              </div>
+              <div class="wk-day"><div class="dh"><div class="d">6</div><div>二</div></div></div>
+              <div class="wk-day"><div class="dh"><div class="d">7</div><div>三</div></div>
+                <div class="evt" style="top:56px;height:20px;">背方歌</div>
+              </div>
+              <div class="wk-day"><div class="dh"><div class="d">8</div><div>四</div></div></div>
+              <div class="wk-day"><div class="dh"><div class="d">9</div><div>五</div></div></div>
+              <div class="wk-day"><div class="dh"><div class="d">10</div><div>六</div></div></div>
+              <div class="wk-day"><div class="dh"><div class="d">11</div><div>日</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点时间轴空白 / 点事件块 / 切换回月</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点空白 → 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点「月」→ 2.1 月视图</span></div>
+      </div>
+    </div>
+
+    <!-- 2.3 主日历 - 首次使用空状态 -->
+<div class="card">
+  <div class="card-head">
+    <span class="card-name">2.3 主日历 · 空状态</span>
+    <span class="card-pos">首次使用</span>
+  </div>
+  <div class="screen">
+    <div class="win-titlebar"><span></span><span></span><span></span></div>
+    <div class="win-nav">
+      <div class="brand">拾光签</div>
+      <div class="icons">
+        <div class="nav-i">☰</div>
+        <div class="nav-i">📥</div>
+        <div class="nav-i">⏻</div>
+      </div>
+    </div>
+    <div class="win-body">
+      <div class="cal-head">
+        <div class="m">2026年 10月</div>
+        <div class="ctrls">
+          <span class="chip on">月</span>
+          <span class="chip">周</span>
+        </div>
+      </div>
+
+      <!-- 正常月视图网格，只是没有事件圆点 -->
+      <div class="grid-m">
+        <div class="wd">一</div><div class="wd">二</div><div class="wd">三</div>
+        <div class="wd">四</div><div class="wd">五</div><div class="wd">六</div><div class="wd">日</div>
+        <div class="cell other"></div><div class="cell other"></div><div class="cell other"></div>
+        <div class="cell">1</div><div class="cell today">2</div><div class="cell">3</div><div class="cell">4</div>
+        <div class="cell">5</div><div class="cell">6</div><div class="cell">7</div><div class="cell">8</div>
+        <div class="cell">9</div><div class="cell">10</div><div class="cell">11</div><div class="cell">12</div>
+        <div class="cell">13</div><div class="cell">14</div><div class="cell">15</div><div class="cell">16</div>
+        <div class="cell">17</div><div class="cell">18</div><div class="cell">19</div><div class="cell">20</div>
+        <div class="cell">21</div><div class="cell">22</div><div class="cell">23</div><div class="cell">24</div>
+        <div class="cell">25</div><div class="cell">26</div><div class="cell">27</div><div class="cell">28</div>
+        <div class="cell">29</div><div class="cell">30</div><div class="cell">31</div><div class="cell other"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-info">
+    <div class="row"><span class="k">操作：</span><span class="v">点击任意日期格</span></div>
+    <div class="row"><span class="k">去向：</span><span class="v">→ 3.1 新建日程弹窗</span></div>
+    <div class="row"><span class="k">说明：</span><span class="v">日历正常渲染，格子都在，只是没有事件圆点；今日高亮保留</span></div>
+  </div>
+</div>
+  </div>
+</div>
+
+
+
+
+<!-- ==================== 第三组：日程操作 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">3</div>
+    <div class="group-title">日程操作</div>
+    <div class="group-desc">新建、编辑、删除日程，以及时间冲突检测</div>
+  </div>
+
+  <div class="cards">
+
+    <!-- 3.1 新建日程弹窗 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.1 新建日程弹窗</span>
+        <span class="card-pos">第 4 步</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>新建日程</h4>
+              <div class="fr"><span class="l">标题</span><span>复习方剂学</span></div>
+              <div class="fr"><span class="l">日期</span><span>2026-10-05</span></div>
+              <div class="fr"><span class="l">开始</span><span>09:00</span></div>
+              <div class="fr"><span class="l">结束</span><span>10:00</span></div>
+              <div class="fr"><span class="l">备注</span><span>—</span></div>
+              <div class="dlg-actions">
+                <span class="b">取消</span>
+                <span class="b p">保存</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">填标题/日期/时间/备注，点保存</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">无冲突 → 2.1 主日历</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">有冲突 → 3.2 冲突检测弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">时间倒置 → 3.3 时间校验失败</span></div>
+      </div>
+    </div>
+
+    <!-- 3.2 时间冲突弹窗 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.2 时间冲突检测</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>⚠ 时间冲突</h4>
+              <div style="font-size:9px;color:#666;text-align:center;margin-bottom:6px;">该时间段与以下日程重叠，请调整时间：</div>
+              <div class="fr"><span>• 复习方剂学</span><span>09:00 - 10:30</span></div>
+              <div class="dlg-actions">
+                <span class="b">知道了</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点「知道了」</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 返回 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">同一时间段不能有两个日程</span></div>
+      </div>
+    </div>
+
+    <!-- 3.3 时间校验失败 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.3 时间顺序校验失败</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>无法保存</h4>
+              <div style="font-size:10px;text-align:center;padding:8px 0;">结束时间必须晚于开始时间</div>
+              <div class="dlg-actions">
+                <span class="b">知道了</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点「知道了」</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 返回 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">结束 ≤ 开始，拒绝保存</span></div>
+      </div>
+    </div>
+
+    <!-- 3.4 编辑已有日程 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.4 编辑已有日程</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>编辑日程</h4>
+              <div class="fr"><span class="l">标题</span><span>复习方剂学</span></div>
+              <div class="fr"><span class="l">日期</span><span>2026-10-05（不可改）</span></div>
+              <div class="fr"><span class="l">开始</span><span>09:00</span></div>
+              <div class="fr"><span class="l">结束</span><span>10:30</span></div>
+              <div class="dlg-actions">
+                <span class="b" style="color:#c00;border-color:#c00;">删除</span>
+                <span class="b">取消</span>
+                <span class="b p">保存</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">改标题/时间 / 点删除</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">保存 → 2.1 主日历</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">删除 → 3.5 删除确认</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">编辑时锁定日期，防止误改</span></div>
+      </div>
+    </div>
+
+    <!-- 3.5 删除确认 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.5 删除确认</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>确认删除</h4>
+              <div style="font-size:10px;text-align:center;padding:8px 0;">该日程将被永久删除。</div>
+              <div class="dlg-actions">
+                <span class="b">取消</span>
+                <span class="b p">删除</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">取消 / 确认删除</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 2.1 主日历</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">删除前二次确认</span> <span class="todo-flag">待确认</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第四组：待办与抽签 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">4</div>
+    <div class="group-title">待办与抽签</div>
+    <div class="group-desc">待办清单、长期待办、签筒抽签</div>
+  </div>
+
+  <div class="cards">
+
+    <!-- 4.1 待办面板（有数据） -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.1 待办面板</span>
+        <span class="card-pos">第 5 步</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">☰</div><div class="nav-i">📥</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="todo-p">
+            <div class="th"><span>待办清单</span><span>✕</span></div>
+            <div class="ta"><button>📌</button><input placeholder="添加待办..."><button>＋</button></div>
+            <div class="tl">
+              <div class="ti"><div class="ck"></div><span>整理药草笔记</span><div class="tg">🎋</div></div>
+              <div class="ti"><div class="ck"></div><span>完成第三章习题</span><div class="tg on">🎋</div></div>
+              <div class="ti"><div class="ck"></div><span>背诵方歌</span><div class="tg on">🎋</div></div>
+            </div>
+            <div class="tf"><span>签筒 (2)</span><span style="background:#222;color:#fff;padding:2px 8px;border-radius:3px;font-size:8px;">抽签</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">添加待办 / 点📌切长期 / 点🎋切签筒 / 右键菜单</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点抽签 → 4.4 抽签弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">右键 → 4.3 待办右键菜单</span></div>
+      </div>
+    </div>
+
+    <!-- 4.2 待办面板（无数据） -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.2 待办面板 · 空状态</span>
+        <span class="card-pos">首次使用</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">☰</div><div class="nav-i">📥</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="todo-p">
+            <div class="th"><span>待办清单</span><span>✕</span></div>
+            <div class="ta"><button>📌</button><input placeholder="添加待办..."><button>＋</button></div>
+            <div class="tl">
+              <div class="empty">
+                <div class="icon">📝</div>
+                <div>还没有待办</div>
+                <div style="font-size:8px;">在上方输入框添加</div>
+              </div>
+            </div>
+            <div class="tf"><span>签筒 (0)</span><span style="background:#eee;color:#999;padding:2px 8px;border-radius:3px;font-size:8px;">抽签</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">在输入框添加第一条待办</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">签筒为空时抽签按钮置灰</span></div>
+      </div>
+    </div>
+
+    <!-- 4.3 待办右键菜单 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.3 待办右键菜单</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="todo-p" style="width:100%;border-left:none;">
+            <div class="th"><span>待办清单</span><span>✕</span></div>
+            <div class="ta"><button>📌</button><input placeholder="添加待办..."><button>＋</button></div>
+            <div class="tl">
+              <div class="ti" style="background:#f5f5f5;"><div class="ck"></div><span>整理药草笔记</span><div class="tg">🎋</div></div>
+              <div class="ti"><div class="ck"></div><span>完成第三章习题</span><div class="tg on">🎋</div></div>
+            </div>
+            <div class="tf"><span>签筒 (1)</span><span style="background:#222;color:#fff;padding:2px 8px;border-radius:3px;font-size:8px;">抽签</span></div>
+          </div>
+          <div class="ctx" style="top:80px;left:120px;">
+            <div>加入日程</div>
+            <div>加入签筒 / 移出签筒</div>
+            <div class="d">删除</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">右键待办项 → 弹出菜单</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加入日程 → 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加入/移出签筒 → 立即生效</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">删除 → 从清单移除</span></div>
+      </div>
+    </div>
+
+    <!-- 4.4 抽签结果弹窗 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.4 抽签结果弹窗</span>
+        <span class="card-pos">第 6 步</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>今日签（已抽 1 / 3 次）</h4>
+              <div style="text-align:center;font-size:26px;padding:8px 0;">🎋</div>
+              <div style="text-align:center;font-size:12px;font-weight:700;margin-bottom:10px;">复习方剂学</div>
+              <div class="dlg-actions" style="justify-content:center;">
+                <span class="b">算了</span>
+                <span class="b">换一个</span>
+                <span class="b p">加入日程</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">算了 / 换一个 / 加入日程</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加入日程 → 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">换一个 → 重新抽取（限 3 次）</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">每日最多抽签 3 次</span></div>
+      </div>
+    </div>
+
+    <!-- 4.5 抽签次数用完 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.5 抽签次数用完</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>今日次数已用完</h4>
+              <div style="font-size:10px;text-align:center;padding:8px 0;">每天最多抽签 3 次，明天再来吧。</div>
+              <div class="dlg-actions" style="justify-content:center;">
+                <span class="b">好吧</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点「好吧」</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 返回待办面板</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">每天限抽 3 次，避免重抽焦虑</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第五组：杂物堆 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">5</div>
+    <div class="group-title">杂物堆</div>
+    <div class="group-desc">独立页面，暂存外部信息，可转为待办或日程</div>
+  </div>
+
+  <div class="cards">
+
+    <!-- 5.1 杂物堆（有数据） -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">5.1 杂物堆</span>
+        <span class="card-pos">第 7 步</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav" style="background:#f5eeff;">
+          <div class="brand" style="color:#6b4a8a;">📥 杂物堆</div>
+          <div class="icons"><div class="nav-i">←</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="inbox">
+            <div class="it"><span>杂物堆</span><span>清空已处理</span></div>
+            <div class="ip">
+              <input placeholder="粘贴内容到此处...">
+              <button>📋</button>
+              <button>＋</button>
+            </div>
+            <div class="il">
+              <div class="ic">
+                <div class="im"><span>📎 QQ群</span><span>9/28</span></div>
+                <div>下周三考试，带学生证，三号楼</div>
+              </div>
+              <div class="ic">
+                <div class="im"><span>📎 教务网</span><span>9/27</span></div>
+                <div>四史补考安排已出，注意查收</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">粘贴内容 / 添加 / 右键卡片</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">右键 → 5.3 杂物堆右键菜单</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">独立于待办，需手动转为待办</span></div>
+      </div>
+    </div>
+
+    <!-- 5.2 杂物堆（无数据） -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">5.2 杂物堆 · 空状态</span>
+        <span class="card-pos">首次使用</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav" style="background:#f5eeff;">
+          <div class="brand" style="color:#6b4a8a;">📥 杂物堆</div>
+          <div class="icons"><div class="nav-i">←</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="inbox">
+            <div class="it"><span>杂物堆</span><span>清空已处理</span></div>
+            <div class="ip">
+              <input placeholder="粘贴内容到此处...">
+              <button>📋</button>
+              <button>＋</button>
+            </div>
+            <div class="il">
+              <div class="empty">
+                <div class="icon">📥</div>
+                <div>杂物堆空空如也</div>
+                <div style="font-size:8px;">粘贴外部消息到这里暂存</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">在输入框粘贴内容 → 点添加</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 5.1 杂物堆（有数据）</span></div>
+      </div>
+    </div>
+
+    <!-- 5.3 杂物堆右键菜单 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">5.3 杂物堆右键菜单</span>
+        <span class="card-pos">分支</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav" style="background:#f5eeff;">
+          <div class="brand" style="color:#6b4a8a;">📥 杂物堆</div>
+          <div class="icons"><div class="nav-i">←</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="inbox">
+            <div class="it"><span>杂物堆</span><span>清空已处理</span></div>
+            <div class="ip">
+              <input placeholder="粘贴内容到此处...">
+              <button>📋</button>
+              <button>＋</button>
+            </div>
+            <div class="il">
+              <div class="ic" style="background:#f5e8ff;">
+                <div class="im"><span>📎 QQ群</span><span>9/28</span></div>
+                <div>下周三考试，带学生证，三号楼</div>
+              </div>
+            </div>
+          </div>
+          <div class="ctx" style="top:130px;left:120px;">
+            <div>转为待办</div>
+            <div>加入日程</div>
+            <div class="d">删除</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">右键杂物卡片</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">转为待办 → 4.1 待办面板新增一项</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加入日程 → 3.1 新建日程弹窗</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">删除 → 从杂物堆移除</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第六组：异常与恢复 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">6</div>
+    <div class="group-title">异常与恢复</div>
+    <div class="group-desc">PRD 未明确说明的状态，统一标「待确认」</div>
+  </div>
+
+  <div class="cards">
+
+    <!-- 6.1 数据加载中 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">6.1 数据加载中</span>
+        <span class="card-pos">过渡态</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body">
+          <div class="empty" style="height:100%;">
+            <div class="loading"></div>
+            <div>正在加载数据...</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">无（自动）</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加载完成 → 2.1 主日历</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">纯本地应用加载极快，此状态可能一闪而过</span> <span class="todo-flag">待确认</span></div>
+      </div>
+    </div>
+
+    <!-- 6.2 数据加载失败 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">6.2 数据加载失败</span>
+        <span class="card-pos">异常</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body">
+          <div class="empty" style="height:100%;">
+            <div class="err-icon">!</div>
+            <div>数据加载失败</div>
+            <div style="font-size:9px;">请检查后重试</div>
+            <div style="margin-top:6px;background:#222;color:#fff;padding:3px 14px;border-radius:3px;font-size:9px;">重新加载</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点「重新加载」</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">成功 → 2.1 主日历</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">PRD 未说明本地数据失败如何处理</span> <span class="todo-flag">待确认</span></div>
+      </div>
+    </div>
+
+    <!-- 6.3 权限申请 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">6.3 通知权限申请</span>
+        <span class="card-pos">可选</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>开启通知权限</h4>
+              <div style="font-size:9px;color:#666;text-align:center;padding:6px 0;">预约时间到、收到新邀请时，及时提醒你</div>
+              <div class="dlg-actions" style="justify-content:center;">
+                <span class="b">暂不开启</span>
+                <span class="b p">去开启</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">暂不开启 / 去开启</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">PRD 未说明是否需要通知权限</span> <span class="todo-flag">待确认</span></div>
+      </div>
+    </div>
+
+    <!-- 6.4 系统托盘 -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">6.4 系统托盘菜单</span>
+        <span class="card-pos">常驻</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;background:#f0f0f0;">
+          <div style="position:absolute;bottom:8px;right:8px;background:#fff;border:1px solid #888;border-radius:4px;font-size:9px;">
+            <div style="padding:5px 14px;border-bottom:1px solid #eee;">显示主界面</div>
+            <div style="padding:5px 14px;border-bottom:1px solid #eee;">杂物堆</div>
+            <div style="padding:5px 14px;color:#c00;">退出</div>
+          </div>
+          <div style="position:absolute;bottom:8px;right:8px;font-size:8px;color:#666;">托盘图标 ↑</div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">右键托盘图标</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">显示主界面 / 杂物堆 / 退出</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">关闭主窗口时隐藏到托盘</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
