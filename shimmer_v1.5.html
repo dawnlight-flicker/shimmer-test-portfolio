@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>拾光签 — V1.5 中途改版原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #d8d8d8;
+    padding: 24px;
+    color: #222;
+    font-size: 12px;
+  }
+  .page-title {
+    max-width: 1800px;
+    margin: 0 auto 24px;
+    background: #fff;
+    border: 2px solid #222;
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+  .page-title h1 { font-size: 18px; margin-bottom: 6px; }
+  .page-title p { font-size: 12px; color: #555; line-height: 1.8; }
+  .flag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .flag-changed { background: #222; color: #fff; }
+  .flag-cut { background: #c00; color: #fff; }
+  .flag-kept { background: #2a7; color: #fff; }
+
+  .group { max-width: 1800px; margin: 0 auto 32px; }
+  .group-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px; padding-bottom: 8px;
+    border-bottom: 2px solid #222;
+  }
+  .group-num {
+    background: #222; color: #fff; font-weight: 700;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .group-title { font-size: 15px; font-weight: 700; }
+  .group-desc { font-size: 11px; color: #666; margin-left: auto; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 280px);
+    gap: 16px;
+  }
+  .card {
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .card-head {
+    background: #222; color: #fff;
+    padding: 6px 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px;
+  }
+  .card-name { font-weight: 700; }
+  .card-pos {
+    font-size: 10px;
+    background: #fff; color: #222;
+    padding: 1px 6px; border-radius: 3px; font-weight: 700;
+  }
+  .screen {
+    height: 340px;
+    border-bottom: 1px solid #ccc;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    background: #fafafa;
+  }
+  .win-titlebar {
+    height: 18px; background: #ddd;
+    display: flex; align-items: center;
+    padding: 0 6px; gap: 4px; flex-shrink: 0;
+  }
+  .win-titlebar span { width: 7px; height: 7px; border-radius: 50%; background: #999; }
+  .win-nav {
+    height: 24px; background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 8px; font-size: 10px; color: #555;
+    flex-shrink: 0;
+  }
+  .win-nav .brand { font-weight: 700; font-size: 11px; }
+  .win-nav .icons { display: flex; gap: 4px; }
+  .nav-i {
+    width: 18px; height: 18px;
+    border: 1px solid #bbb; border-radius: 3px;
+    background: #f5f5f5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+  .win-body { flex: 1; position: relative; overflow: hidden; padding: 8px; }
+
+  /* 列表 */
+  .list-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 10px;
+  }
+  .avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #ddd;
+    border: 1px solid #bbb;
+    flex-shrink: 0;
+  }
+  .list-item .name { font-weight: 700; }
+  .list-item .sub { font-size: 8px; color: #999; }
+  .list-item .action {
+    margin-left: auto;
+    border: 1px solid #bbb;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 8px;
+    background: #fafafa;
+  }
+
+  /* 加好友输入 */
+  .add-row {
+    display: flex; gap: 4px;
+    padding: 5px 6px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .add-row input {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+  .add-row button {
+    padding: 0 8px;
+    border: 1px solid #222;
+    background: #222;
+    color: #fff;
+    border-radius: 2px;
+    font-size: 9px;
+  }
+
+  /* 私人日程表 */
+  .private-cal {
+    border: 1.5px solid #222;
+    border-radius: 4px;
+    padding: 6px;
+    background: #fff;
+    position: relative;
+  }
+  .private-cal::after {
+    content: "🔒 仅自己可见";
+    position: absolute;
+    top: -8px; right: 6px;
+    background: #222; color: #fff;
+    font-size: 8px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .pc-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-top: 6px;
+  }
+  .pc-cell {
+    aspect-ratio: 1;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    background: #fdfdfd;
+    font-size: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .pc-cell.busy {
+    background: #ccc;
+    border-color: #aaa;
+  }
+  .pc-cell .dot {
+    position: absolute;
+    bottom: 1px;
+    width: 3px; height: 3px;
+    background: #555;
+    border-radius: 50%;
+  }
+
+  /* 小组 */
+  .group-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+  .group-card .gname { font-weight: 700; font-size: 11px; }
+  .group-card .gmeta {
+    font-size: 8px; color: #888;
+    display: flex; justify-content: space-between;
+    margin-top: 3px;
+  }
+  .group-card .gbtn {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 10px;
+    border: 1px solid #222;
+    background: #222; color: #fff;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+
+  /* 群聊 */
+  .chat {
+    display: flex; flex-direction: column;
+    height: 100%;
+    background: #fafafa;
+  }
+  .chat-msg {
+    max-width: 78%;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    margin-bottom: 6px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    line-height: 1.5;
+  }
+  .chat-msg.me {
+    margin-left: auto;
+    background: #d8d8d8;
+    border-color: #bbb;
+  }
+  .chat-msg .who {
+    font-size: 8px;
+    color: #888;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .chat-msg .invite-tag {
+    display: inline-block;
+    background: #222; color: #fff;
+    font-size: 7px;
+    padding: 0 4px;
+    border-radius: 2px;
+    margin-right: 3px;
+  }
+  .chat-input {
+    margin-top: auto;
+    display: flex; gap: 4px;
+    padding-top: 6px;
+    border-top: 1px solid #eee;
+  }
+  .chat-input input {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+  .chat-input button {
+    padding: 0 10px;
+    border: 1px solid #222;
+    background: #222;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+
+  /* 弹窗 */
+  .mask {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dlg {
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 5px;
+    padding: 10px;
+    width: 80%;
+    font-size: 10px;
+  }
+  .dlg h4 { font-size: 11px; text-align: center; margin-bottom: 8px; }
+  .fr {
+    display: flex; justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 9px;
+  }
+  .fr .l { color: #888; }
+  .dlg-actions {
+    display: flex; justify-content: flex-end; gap: 4px;
+    margin-top: 8px;
+  }
+  .b {
+    padding: 2px 8px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+  .b.p { background: #222; color: #fff; border-color: #222; }
+
+  /* 卡片说明 */
+  .card-info {
+    padding: 8px 10px;
+    font-size: 10px;
+    line-height: 1.6;
+    color: #444;
+    flex-grow: 1;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .card-info .row { display: flex; gap: 6px; }
+  .card-info .row .k { color: #888; flex-shrink: 0; width: 46px; }
+  .card-info .row .v { flex: 1; }
+  .card-info .cut { color: #c00; font-weight: 700; }
+  .card-info .changed { color: #222; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>拾光签 / Shimmer — V1.5 中途改版原型</h1>
+  <p>
+    V1 到 V2 之间的<strong>过渡版本</strong>。三个关键变化：<br>
+    <b>① 日程表改私人</b>——好友不能看你的日程，你也不能看好友的。<br>
+    <b>② 邀约改公屏</b>——不再点对点，改为发到小组公屏，用户自行确认。<br>
+    <b>③ 小组单人也能建</b>——所以个人邀约冗余了：你有事直接发小组，不用单独找谁。<br>
+    每屏标注：页面名称、改动类型、可执行操作、操作后去向。
+    <span class="flag flag-changed">改</span> = 相比 V1 改动
+    <span class="flag flag-cut">砍</span> = 相比 V1 砍掉
+    <span class="flag flag-kept">留</span> = 保留到 V2
+  </p>
+</div>
+
+
+<!-- ==================== 第一组：好友（改版） ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">1</div>
+    <div class="group-title">好友与小组（V1.5 改版）</div>
+    <div class="group-desc">好友不再可见日程，只能拉进小组；小组单人也能建</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.1 好友列表（改版）</span>
+        <span class="card-pos">V1.5</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">👥</div><div class="nav-i">📥</div></div>
+        </div>
+        <div class="win-body">
+          <div class="add-row">
+            <input placeholder="输入学号添加好友...">
+            <button>添加</button>
+          </div>
+
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">小 A</div>
+              <div class="sub">2023xxxx</div>
+            </div>
+            <div class="action">拉进小组</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">小 B</div>
+              <div class="sub">2023xxxx</div>
+            </div>
+            <div class="action">拉进小组</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">小 C</div>
+              <div class="sub">2023xxxx</div>
+            </div>
+            <div class="action">拉进小组</div>
+          </div>
+
+          <div style="font-size:8px;color:#888;margin-top:8px;line-height:1.5;">
+            ▣ 好友仅可拉进小组，<br>不能查看对方日程
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">加好友 / 拉好友进小组</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 1.3 小组列表</span></div>
+        <div class="row"><span class="k">改动：</span><span class="v changed">删掉"查看日程"按钮，改为"拉进小组"</span></div>
+        <div class="row"><span class="k">原因：</span><span class="v">看别人日程就算朋友也侵犯隐私</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.2 好友日程表（砍掉）</span>
+        <span class="card-pos">V1.5</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">‹</div></div>
+        </div>
+        <div class="win-body" style="display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:#999;font-size:10px;line-height:1.8;">
+            <div style="font-size:36px;opacity:0.3;">🚫</div>
+            <div>此页面已删除</div>
+            <div style="font-size:8px;margin-top:6px;">好友日程表不可查看</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">改动：</span><span class="v cut">整页砍掉</span></div>
+        <div class="row"><span class="k">原因：</span><span class="v">查看别人日程 = 隐私问题；用户也不希望自己日程被看</span></div>
+        <div class="row"><span class="k">替代：</span><span class="v">改为小组公屏邀约（见 2.2）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.3 小组列表（改版）</span>
+        <span class="card-pos">V1.5 · 核心</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">我的小组</div>
+          <div class="icons"><div class="nav-i">＋</div></div>
+        </div>
+        <div class="win-body">
+          <div class="group-card">
+            <div class="gname">期末突击队</div>
+            <div class="gmeta">
+              <span>3 人 · 我 + 小A + 小B</span>
+              <span>🐱 小方</span>
+            </div>
+            <span class="gbtn">进入公屏</span>
+          </div>
+
+          <div class="group-card">
+            <div class="gname">一个人自习</div>
+            <div class="gmeta">
+              <span>1 人 · 仅自己</span>
+              <span>🐱 小独</span>
+            </div>
+            <span class="gbtn">进入公屏</span>
+          </div>
+
+          <div style="font-size:8px;color:#888;margin-top:8px;line-height:1.5;">
+            ▣ 小组单人也能建，<br>一个人也可以养猫、发日程
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">建小组 / 进入小组公屏</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 2.2 小组公屏</span></div>
+        <div class="row"><span class="k">改动：</span><span class="v changed">小组从"多人专属"改为"单人也能建"</span></div>
+        <div class="row"><span class="k">原因：</span><span class="v">单人也能建 → 个人邀约冗余</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第二组：小组公屏（改版） ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">2</div>
+    <div class="group-title">小组公屏（V1.5 改版）</div>
+    <div class="group-desc">邀约从"点对点"改为"发到公屏，谁看到谁响应"</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.1 个人邀约（砍掉）</span>
+        <span class="card-pos">V1.5</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">✕</div></div>
+        </div>
+        <div class="win-body" style="display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:#999;font-size:10px;line-height:1.8;">
+            <div style="font-size:36px;opacity:0.3;">🚫</div>
+            <div>个人邀约已删除</div>
+            <div style="font-size:8px;margin-top:6px;">
+              原因：小组单人也能建，<br>发到公屏就够，个人邀约冗余
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">改动：</span><span class="v cut">整功能砍掉</span></div>
+        <div class="row"><span class="k">原因 1：</span><span class="v">小组单人也能建 → 有事直接发小组</span></div>
+        <div class="row"><span class="k">原因 2：</span><span class="v">点对点邀约 = 已读不回压力</span></div>
+        <div class="row"><span class="k">替代：</span><span class="v">小组公屏（见 2.2）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.2 小组公屏（核心）</span>
+        <span class="card-pos">V1.5 · 核心</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">期末突击队 · 公屏</div>
+          <div class="icons"><div class="nav-i">👥</div><div class="nav-i">🐱</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="chat" style="padding:8px;">
+            <div class="chat-msg me">
+              <span class="who">我</span>
+              <span class="invite-tag">邀约</span>下午 14:00-16:00 图书馆 3F 复习方剂学，谁有空？
+            </div>
+            <div class="chat-msg">
+              <span class="who">小 A</span>
+              我有空，我去占座
+            </div>
+            <div class="chat-msg">
+              <span class="who">小 B</span>
+              我下午有课，晚上行吗
+            </div>
+            <div class="chat-input">
+              <input placeholder="发消息或发起邀约...">
+              <button>＋邀约</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">发消息 / 点＋邀约发起学习邀请</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">响应者自行确认 → 加入自己日历</span></div>
+        <div class="row"><span class="k">改动：</span><span class="v changed">从"点对点邀约"改为"公屏邀约"</span></div>
+        <div class="row"><span class="k">原因：</span><span class="v">谁看到谁响应，没有必须回应的压力</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.3 发起邀约弹窗</span>
+        <span class="card-pos">V1.5</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">期末突击队</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>发起小组邀约</h4>
+              <div class="fr"><span class="l">小组</span><span>期末突击队</span></div>
+              <div class="fr"><span class="l">日期</span><span>2026-10-05</span></div>
+              <div class="fr"><span class="l">时间</span><span>14:00 - 16:00</span></div>
+              <div class="fr"><span class="l">内容</span><span>一起复习方剂学</span></div>
+              <div class="fr"><span class="l">地点</span><span>图书馆 3F</span></div>
+              <div class="dlg-actions">
+                <span class="b">取消</span>
+                <span class="b p">发到公屏</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">填时间/内容 → 发到公屏</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 2.2 公屏显示该邀约</span></div>
+        <div class="row"><span class="k">改动：</span><span class="v changed">从"发给指定好友"改为"发到小组"</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.4 响应邀约</span>
+        <span class="card-pos">V1.5</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">期末突击队</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>加入这个邀约？</h4>
+              <div style="font-size:9px;color:#666;text-align:center;padding:4px 0;">
+                加入后会同步到你自己的日历
+              </div>
+              <div class="fr"><span class="l">时间</span><span>10/5 14:00-16:00</span></div>
+              <div class="fr"><span class="l">内容</span><span>一起复习方剂学</span></div>
+              <div class="fr"><span class="l">地点</span><span>图书馆 3F</span></div>
+              <div class="dlg-actions">
+                <span class="b">不加入</span>
+                <span class="b p">加入我的日历</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">加入 / 不加入</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">加入 → 自己日历新增该日程</span></div>
+        <div class="row"><span class="k">改动：</span><span class="v changed">不需要"接受/拒绝"对方，只决定自己加不加</span></div>
+        <div class="row"><span class="k">原因：</span><span class="v">没有社交压力，不用回应任何人</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第三组：私人日程表 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">3</div>
+    <div class="group-title">私人日程表（V1.5 改版）</div>
+    <div class="group-desc">日程表完全私人，好友不可见；只在小组公屏共享"我有空"</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.1 我的日程表（私人）</span>
+        <span class="card-pos">V1.5 · 核心</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">👥</div><div class="nav-i">📥</div></div>
+        </div>
+        <div class="win-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;">2026年 10月</div>
+          <div class="private-cal">
+            <div class="pc-grid">
+              <div class="pc-cell">1</div>
+              <div class="pc-cell busy">2</div>
+              <div class="pc-cell">3</div>
+              <div class="pc-cell busy">4</div>
+              <div class="pc-cell busy">5<div class="dot"></div></div>
+              <div class="pc-cell">6</div>
+              <div class="pc-cell">7</div>
+              <div class="pc-cell">8</div>
+              <div class="pc-cell busy">9</div>
+              <div class="pc-cell">10</div>
+              <div class="pc-cell busy">11</div>
+              <div class="pc-cell">12</div>
+              <div class="pc-cell busy">13</div>
+              <div class="pc-cell">14</div>
+              <div class="pc-cell">15</div>
+              <div class="pc-cell busy">16</div>
+              <div class="pc-cell">17</div>
+              <div class="pc-cell">18</div>
+              <div class="pc-cell">19</div>
+              <div class="pc-cell busy">20</div>
+              <div class="pc-cell">21</div>
+            </div>
+          </div>
+          <div style="font-size:8px;color:#888;margin-top:8px;line-height:1.5;">
+            ▣ 好友不可见；<br>只在小组公屏里自己决定要不要响应
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">改动：</span><span class="v changed">标记为"仅自己可见"</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">看别人日程不隐私 → 改为互相都不可见</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">保留到 V2 主日历</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.2 隐私说明</span>
+        <span class="card-pos">V1.5</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">隐私设置</div></div>
+        <div class="win-body" style="padding:12px;">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;">🔒 日程隐私</div>
+          <div style="font-size:9px;color:#666;line-height:1.8;">
+            你的日程表<strong>永远只有你自己能看到</strong>。<br>
+            好友不能查看，小组也看不到具体日程。<br>
+            你只会在小组公屏里主动选择"响应某个邀约"，<br>
+            或者自己发一条"谁有空"。
+          </div>
+          <div style="margin-top:12px;border-top:1px dashed #ddd;padding-top:10px;font-size:9px;color:#888;line-height:1.8;">
+            <div>▣ 好友仅可拉进小组</div>
+            <div>▣ 小组公屏只显示邀约，不显示个人日程</div>
+            <div>▣ 是否加入邀约由自己决定</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">说明：</span><span class="v">把隐私逻辑写清楚，避免用户误以为日程被共享</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">此逻辑保留到 V2</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 结尾：V1 → V1.5 → V2 ==================== -->
+<div class="page-title" style="margin-top:32px;">
+  <h1>V1 → V1.5 → V2 变化对照</h1>
+  <table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;line-height:1.7;">
+    <thead>
+      <tr style="background:#222;color:#fff;">
+        <th style="padding:6px 8px;text-align:left;">功能</th>
+        <th style="padding:6px 8px;text-align:left;">V1</th>
+        <th style="padding:6px 8px;text-align:left;">V1.5（改）</th>
+        <th style="padding:6px 8px;text-align:left;">V2（最终）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>好友日程表</b></td>
+        <td style="padding:6px 8px;">好友可见、可点空闲格邀约</td>
+        <td style="padding:6px 8px;color:#c00;">砍掉（隐私问题）</td>
+        <td style="padding:6px 8px;color:#c00;">—</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>个人邀约</b></td>
+        <td style="padding:6px 8px;">点对点，需要对方确认</td>
+        <td style="padding:6px 8px;color:#c00;">砍掉（小组单人也能建，冗余）</td>
+        <td style="padding:6px 8px;color:#c00;">—</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>小组公屏</b></td>
+        <td style="padding:6px 8px;">有，多人小组</td>
+        <td style="padding:6px 8px;">升级为唯一邀约入口，单人也能建</td>
+        <td style="padding:6px 8px;color:#c00;">—</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>日程表可见性</b></td>
+        <td style="padding:6px 8px;">好友可见</td>
+        <td style="padding:6px 8px;color:#222;font-weight:700;">完全私人</td>
+        <td style="padding:6px 8px;color:#222;font-weight:700;">完全私人</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>一起养猫</b></td>
+        <td style="padding:6px 8px;">小组共养，可买猫粮</td>
+        <td style="padding:6px 8px;">保留（未砍）</td>
+        <td style="padding:6px 8px;color:#c00;">砍掉（动画做不出来）</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>学习周报</b></td>
+        <td style="padding:6px 8px;">有</td>
+        <td style="padding:6px 8px;">保留</td>
+        <td style="padding:6px 8px;color:#c00;">砍掉（工期）</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>付费（皮肤/礼物）</b></td>
+        <td style="padding:6px 8px;">有</td>
+        <td style="padding:6px 8px;">保留</td>
+        <td style="padding:6px 8px;color:#c00;">砍掉（工期）</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>邮箱拉取</b></td>
+        <td style="padding:6px 8px;">IMAP 授权码</td>
+        <td style="padding:6px 8px;">保留</td>
+        <td style="padding:6px 8px;color:#c00;">砍掉（维护成本）</td>
+      </tr>
+      <tr style="border-bottom:1px solid #eee;">
+        <td style="padding:6px 8px;"><b>日历 / 待办 / 签筒</b></td>
+        <td style="padding:6px 8px;">有</td>
+        <td style="padding:6px 8px;">保留</td>
+        <td style="padding:6px 8px;color:#2a7;font-weight:700;">保留 ✅</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:14px;font-size:12px;color:#444;line-height:1.8;">
+    <b>V1.5 的核心判断：</b><br>
+    ① 看别人日程，就算朋友也侵犯隐私 → 日程表改完全私人。<br>
+    ② 小组单人也能建 → 有事直接发小组，个人邀约冗余。<br>
+    ③ 点对点邀约需要对方回应 → 改为公屏，谁看到谁响应，没有社交压力。<br>
+    <br>
+    <b>V1.5 保留但最终被 V2 砍掉的：</b>养猫、周报、付费、邮箱拉取——这些是因为<strong>动画做不出来、工期太长、维护成本高</strong>，不是设计判断问题。
+  </p>
+</div>
+
+</body>
+</html>

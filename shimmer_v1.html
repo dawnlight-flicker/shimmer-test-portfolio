@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>拾光签 — V1 原始设想原型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #d8d8d8;
+    padding: 24px;
+    color: #222;
+    font-size: 12px;
+  }
+  .page-title {
+    max-width: 1800px;
+    margin: 0 auto 24px;
+    background: #fff;
+    border: 2px solid #222;
+    border-radius: 6px;
+    padding: 16px 20px;
+  }
+  .page-title h1 { font-size: 18px; margin-bottom: 6px; }
+  .page-title p { font-size: 12px; color: #555; line-height: 1.7; }
+  .cut-flag {
+    display: inline-block;
+    background: #c00;
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+
+  .group { max-width: 1800px; margin: 0 auto 32px; }
+  .group-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px; padding-bottom: 8px;
+    border-bottom: 2px solid #222;
+  }
+  .group-num {
+    background: #222; color: #fff; font-weight: 700;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .group-title { font-size: 15px; font-weight: 700; }
+  .group-desc { font-size: 11px; color: #666; margin-left: auto; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 280px);
+    gap: 16px;
+  }
+  .card {
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .card-head {
+    background: #222; color: #fff;
+    padding: 6px 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px;
+  }
+  .card-name { font-weight: 700; }
+  .card-pos {
+    font-size: 10px;
+    background: #fff; color: #222;
+    padding: 1px 6px; border-radius: 3px;
+    font-weight: 700;
+  }
+  .screen {
+    height: 340px;
+    border-bottom: 1px solid #ccc;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    background: #fafafa;
+  }
+  .win-titlebar {
+    height: 18px; background: #ddd;
+    display: flex; align-items: center;
+    padding: 0 6px; gap: 4px; flex-shrink: 0;
+  }
+  .win-titlebar span { width: 7px; height: 7px; border-radius: 50%; background: #999; }
+  .win-nav {
+    height: 24px; background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 8px; font-size: 10px; color: #555;
+    flex-shrink: 0;
+  }
+  .win-nav .brand { font-weight: 700; font-size: 11px; }
+  .win-nav .icons { display: flex; gap: 4px; }
+  .nav-i {
+    width: 18px; height: 18px;
+    border: 1px solid #bbb; border-radius: 3px;
+    background: #f5f5f5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+  .win-body {
+    flex: 1; position: relative;
+    overflow: hidden; padding: 8px;
+  }
+
+  /* 列表 */
+  .list-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 10px;
+  }
+  .avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #ddd;
+    border: 1px solid #bbb;
+    flex-shrink: 0;
+  }
+  .list-item .name { font-weight: 700; }
+  .list-item .status { margin-left: auto; font-size: 9px; color: #888; }
+  .list-item .status.free { color: #2a7; }
+
+  /* 好友日程表 */
+  .friend-cal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-top: 4px;
+  }
+  .fc-cell {
+    aspect-ratio: 1;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    background: #fdfdfd;
+    font-size: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .fc-cell.busy { background: #ccc; border-color: #aaa; }
+  .fc-cell.free { background: #fff; }
+  .fc-cell.clickable {
+    border: 1.5px dashed #222;
+    cursor: pointer;
+  }
+  .legend {
+    display: flex; gap: 10px; font-size: 9px; color: #666;
+    margin-top: 6px;
+  }
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 8px; height: 8px;
+    border: 1px solid #999;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+  .legend .lg-busy::before { background: #ccc; }
+  .legend .lg-free::before { background: #fff; }
+
+  /* 群聊 */
+  .chat {
+    display: flex; flex-direction: column;
+    height: 100%;
+    background: #fafafa;
+  }
+  .chat-msg {
+    max-width: 75%;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    margin-bottom: 6px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    line-height: 1.5;
+  }
+  .chat-msg.me {
+    margin-left: auto;
+    background: #d8d8d8;
+    border-color: #bbb;
+  }
+  .chat-input {
+    margin-top: auto;
+    display: flex; gap: 4px;
+    padding-top: 6px;
+    border-top: 1px solid #eee;
+  }
+  .chat-input input {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 9px;
+  }
+  .chat-input button {
+    padding: 0 10px;
+    border: 1px solid #222;
+    background: #222;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+
+  /* 养猫 */
+  .cat-stage {
+    height: 140px;
+    border: 1.5px dashed #999;
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+  }
+  .cat-stage .cat {
+    font-size: 42px;
+  }
+  .cat-stage .cat-label {
+    font-size: 9px;
+    color: #999;
+  }
+  .cat-stage .annot {
+    position: absolute;
+    top: 6px; left: 8px;
+    font-size: 8px;
+    color: #c00;
+    background: #fff;
+    padding: 1px 5px;
+    border: 1px solid #c00;
+    border-radius: 3px;
+  }
+  .cat-stats {
+    display: flex; gap: 8px;
+    margin-top: 8px;
+  }
+  .cat-stat {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+  .cat-stat .k { color: #888; font-size: 8px; }
+  .cat-stat .v { font-weight: 700; font-size: 11px; margin-top: 2px; }
+  .bar {
+    height: 4px; background: #eee;
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .bar > i {
+    display: block; height: 100%;
+    background: #555;
+  }
+  .cat-actions {
+    display: flex; gap: 4px;
+    margin-top: 8px;
+  }
+  .cat-actions button {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+
+  /* 商店 */
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .shop-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px;
+    text-align: center;
+    font-size: 9px;
+  }
+  .shop-item .thumb {
+    height: 48px;
+    border: 1px dashed #ccc;
+    border-radius: 3px;
+    background: #f5f5f5;
+    margin-bottom: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    color: #bbb;
+  }
+  .shop-item .price { color: #c00; font-weight: 700; font-size: 10px; }
+
+  /* 周报 */
+  .report-block {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+  .report-block .rl { color: #888; font-size: 9px; }
+  .report-block .rv { font-weight: 700; font-size: 14px; margin-top: 2px; }
+  .chart {
+    height: 60px;
+    border: 1px dashed #ccc;
+    border-radius: 3px;
+    background: #fafafa;
+    margin-top: 6px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding: 4px;
+    gap: 3px;
+  }
+  .chart > div {
+    flex: 1;
+    background: #bbb;
+    border-radius: 1px 1px 0 0;
+  }
+
+  /* 弹窗 */
+  .mask {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dlg {
+    background: #fff;
+    border: 1.5px solid #222;
+    border-radius: 5px;
+    padding: 10px;
+    width: 80%;
+    font-size: 10px;
+  }
+  .dlg h4 { font-size: 11px; text-align: center; margin-bottom: 8px; }
+  .fr {
+    display: flex; justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 9px;
+  }
+  .fr .l { color: #888; }
+  .dlg-actions {
+    display: flex; justify-content: flex-end; gap: 4px;
+    margin-top: 8px;
+  }
+  .b {
+    padding: 2px 8px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+    border-radius: 3px;
+    font-size: 9px;
+  }
+  .b.p { background: #222; color: #fff; border-color: #222; }
+
+  /* 邮件 */
+  .mail-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 6px 8px;
+    font-size: 9px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .mail-item .title { flex: 1; }
+  .mail-item .from { color: #999; font-size: 8px; }
+  .mail-item .act {
+    border: 1px solid #bbb;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 8px;
+    background: #fafafa;
+  }
+
+  /* 卡片说明 */
+  .card-info {
+    padding: 8px 10px;
+    font-size: 10px;
+    line-height: 1.6;
+    color: #444;
+    flex-grow: 1;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .card-info .row { display: flex; gap: 6px; }
+  .card-info .row .k { color: #888; flex-shrink: 0; width: 46px; }
+  .card-info .row .v { flex: 1; }
+  .card-info .cut { color: #c00; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>拾光签 / Shimmer — V1 原始设想原型</h1>
+  <p>
+    这是拾光签在<strong>开发前的最初设想</strong>，包含社交预约、学习小组、一起养猫、学习周报、付费皮肤、邮箱拉取等功能。<br>
+    最终因<strong>猫的动画做不出来、工期太长、社交压力、个人开发维护成本高</strong>，全部砍掉，只保留日历、待办、签筒三个核心功能。<br>
+    每屏标注：页面名称、V1 位置、可执行操作、操作后去向，被砍掉的功能用 <span class="cut-flag">已砍</span> 标出。
+  </p>
+</div>
+
+
+<!-- ==================== 第一组：社交与邀约 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">1</div>
+    <div class="group-title">社交与邀约（V1）</div>
+    <div class="group-desc">V1 设想：好友可互看日程、点空闲时间发起邀约</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.1 好友列表</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">👥</div><div class="nav-i">📥</div></div>
+        </div>
+        <div class="win-body">
+          <div class="chat-input" style="margin-bottom:8px;">
+            <input placeholder="输入学号添加好友...">
+            <button>添加</button>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">小 A</div>
+              <div class="from" style="font-size:8px;color:#999;">2023xxxx</div>
+            </div>
+            <div class="status free">空闲中</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">小 B</div>
+              <div class="from" style="font-size:8px;color:#999;">2023xxxx</div>
+            </div>
+            <div class="status">复习中</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">小 C</div>
+              <div class="from" style="font-size:8px;color:#999;">2023xxxx</div>
+            </div>
+            <div class="status free">空闲中</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">输入学号加好友 / 点好友查看日程</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 1.2 好友日程表</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">只让认识的人加，避免陌生人社交</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（不做线上交友）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.2 好友日程表</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">‹</div></div>
+        </div>
+        <div class="win-body">
+          <div style="font-size:10px;font-weight:700;margin-bottom:4px;">小 A 的本周日程</div>
+          <div class="friend-cal">
+            <div class="fc-cell free"></div>
+            <div class="fc-cell busy"></div>
+            <div class="fc-cell busy"></div>
+            <div class="fc-cell free clickable"></div>
+            <div class="fc-cell busy"></div>
+            <div class="fc-cell free clickable"></div>
+            <div class="fc-cell free"></div>
+          </div>
+          <div class="legend">
+            <span class="lg-busy">有课</span>
+            <span class="lg-free">空闲</span>
+          </div>
+          <div style="margin-top:8px;font-size:9px;color:#c00;">
+            ▣ 虚线格 = 可发起邀约
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点虚线空闲格 → 发起邀约</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 1.3 发起邀约弹窗</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（日程表改为完全私人，好友不可见）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.3 发起邀约弹窗</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>发起学习邀约</h4>
+              <div class="fr"><span class="l">好友</span><span>小 A</span></div>
+              <div class="fr"><span class="l">日期</span><span>2026-10-05</span></div>
+              <div class="fr"><span class="l">时间</span><span>14:00 - 16:00</span></div>
+              <div class="fr"><span class="l">内容</span><span>一起复习方剂学</span></div>
+              <div class="fr"><span class="l">地点</span><span>图书馆 3F</span></div>
+              <div class="dlg-actions">
+                <span class="b">取消</span>
+                <span class="b p">发送邀约</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">填内容/时间，点发送</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 1.4 邀约确认（对方视角）</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">需要对方确认，易产生"已读不回"尴尬</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（改为小组公屏邀约，见 2.2）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">1.4 邀约确认（对方）</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav"><div class="brand">拾光签</div></div>
+        <div class="win-body" style="padding:0;">
+          <div class="mask">
+            <div class="dlg">
+              <h4>收到邀约</h4>
+              <div class="fr"><span class="l">来自</span><span>小 B</span></div>
+              <div class="fr"><span class="l">时间</span><span>10/5 14:00-16:00</span></div>
+              <div class="fr"><span class="l">内容</span><span>一起复习方剂学</span></div>
+              <div class="dlg-actions">
+                <span class="b">拒绝</span>
+                <span class="b">改时间</span>
+                <span class="b p">接受</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">接受 / 拒绝 / 改时间</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">拒绝需要理由吗？容易社交压力</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第二组：小组与养猫 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">2</div>
+    <div class="group-title">小组与养猫（V1）</div>
+    <div class="group-desc">V1 设想：邀约改到小组公屏，用养猫补陪伴感</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.1 学习小组</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">拾光签</div>
+          <div class="icons"><div class="nav-i">👥</div></div>
+        </div>
+        <div class="win-body">
+          <div style="font-size:11px;font-weight:700;margin-bottom:6px;">我的小组：期末突击队</div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div class="name">我（组长）</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div class="name">小 A</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar"></div>
+            <div class="name">小 B</div>
+          </div>
+          <div style="margin-top:10px;font-size:9px;color:#888;">
+            小组内可发邀约、一起养猫
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">进入小组公屏 / 看小组猫</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 2.2 小组公屏 / 2.3 一起养猫</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.2 小组公屏</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">期末突击队</div>
+          <div class="icons"><div class="nav-i">‹</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="chat" style="padding:8px;">
+            <div class="chat-msg">谁下午有空一起复习方剂学？14:00 图书馆</div>
+            <div class="chat-msg me">我有空，我去占座</div>
+            <div class="chat-msg">我也来，顺便把背方歌那题过了</div>
+            <div class="chat-input">
+              <input placeholder="发消息...">
+              <button>发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">发消息发起邀约 / 回复</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">替代 1.3 点对点邀约，用户自行确认是否有空</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（开发量大）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.3 一起养猫</span>
+        <span class="card-pos">V1 · 核心</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">期末突击队 · 猫</div>
+          <div class="icons"><div class="nav-i">🍖</div><div class="nav-i">👥</div></div>
+        </div>
+        <div class="win-body">
+          <div class="cat-stage">
+            <div class="annot">动画待实现</div>
+            <div class="cat">🐱</div>
+            <div class="cat-label">小组共养 · 名字：小方</div>
+          </div>
+          <div class="cat-stats">
+            <div class="cat-stat">
+              <div class="k">饥饿度</div>
+              <div class="v">72%</div>
+              <div class="bar"><i style="width:72%"></i></div>
+            </div>
+            <div class="cat-stat">
+              <div class="k">心情</div>
+              <div class="v">58%</div>
+              <div class="bar"><i style="width:58%"></i></div>
+            </div>
+          </div>
+          <div class="cat-actions">
+            <button>🍚 喂食</button>
+            <button>🎾 逗猫</button>
+            <button>🛒 猫粮</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">喂食 / 逗猫 / 买猫粮</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">点猫粮 → 2.4 猫粮商店</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">用养猫补"一起学习没陪伴感"</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（猫的动画做不出来，是核心体验）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">2.4 猫粮商店</span>
+        <span class="card-pos">V1 · 付费</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">猫粮商店</div>
+          <div class="icons"><div class="nav-i">💰</div></div>
+        </div>
+        <div class="win-body">
+          <div class="shop-grid">
+            <div class="shop-item">
+              <div class="thumb">🍚</div>
+              <div>普通猫粮</div>
+              <div class="price">¥6</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">🍖</div>
+              <div>高级罐头</div>
+              <div class="price">¥12</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">🐟</div>
+              <div>小鱼干</div>
+              <div class="price">¥3</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">🎁</div>
+              <div>猫玩具</div>
+              <div class="price">¥9</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">购买猫粮/玩具</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">付费点之一（另含皮肤、礼物）</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第三组：学习周报 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">3</div>
+    <div class="group-title">学习周报（V1）</div>
+    <div class="group-desc">V1 设想：每周生成学习记录，形成正反馈</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">3.1 学习周报</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">本周学习报告</div>
+          <div class="icons"><div class="nav-i">‹</div><div class="nav-i">›</div></div>
+        </div>
+        <div class="win-body">
+          <div style="font-size:10px;color:#888;margin-bottom:6px;">10/5 - 10/11</div>
+          <div class="report-block">
+            <div class="rl">完成日程</div>
+            <div class="rv">12 项</div>
+          </div>
+          <div class="report-block">
+            <div class="rl">学习时长</div>
+            <div class="rv">18.5 小时</div>
+          </div>
+          <div class="report-block">
+            <div class="rl">最长连续学习</div>
+            <div class="rv">3 天</div>
+            <div class="chart">
+              <div style="height:40%"></div>
+              <div style="height:70%"></div>
+              <div style="height:55%"></div>
+              <div style="height:90%"></div>
+              <div style="height:30%"></div>
+              <div style="height:60%"></div>
+              <div style="height:20%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">查看本周统计 / 分享</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">给用户正反馈，提高留存</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（开发量大）</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第四组：商业化 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">4</div>
+    <div class="group-title">商业化（V1）</div>
+    <div class="group-desc">V1 设想：皮肤 + 礼物 + 猫粮，三条付费线</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.1 皮肤商店</span>
+        <span class="card-pos">V1 · 付费</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">皮肤商店</div>
+          <div class="icons"><div class="nav-i">💰</div></div>
+        </div>
+        <div class="win-body">
+          <div class="shop-grid">
+            <div class="shop-item">
+              <div class="thumb">🌿</div>
+              <div>森系（默认）</div>
+              <div class="price">免费</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">🌸</div>
+              <div>樱花季</div>
+              <div class="price">¥6</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">❄️</div>
+              <div>初雪</div>
+              <div class="price">¥8</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">🌙</div>
+              <div>深夜自习</div>
+              <div class="price">¥8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">购买皮肤 / 预览 / 应用</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">付费点之一</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">4.2 赠送礼物</span>
+        <span class="card-pos">V1 · 付费</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">送给好友</div>
+          <div class="icons"><div class="nav-i">‹</div></div>
+        </div>
+        <div class="win-body">
+          <div class="fr"><span class="l">收礼人</span><span>小 A</span></div>
+          <div class="shop-grid" style="margin-top:8px;">
+            <div class="shop-item">
+              <div class="thumb">☕</div>
+              <div>咖啡</div>
+              <div class="price">¥6</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">🍰</div>
+              <div>蛋糕</div>
+              <div class="price">¥12</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">📚</div>
+              <div>加油笔记</div>
+              <div class="price">¥3</div>
+            </div>
+            <div class="shop-item">
+              <div class="thumb">💐</div>
+              <div>花束</div>
+              <div class="price">¥9</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">选礼物 → 赠送</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">付费点之一，用礼物维系好友关系</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 第五组：邮箱拉取 ==================== -->
+<div class="group">
+  <div class="group-header">
+    <div class="group-num">5</div>
+    <div class="group-title">邮箱拉取（V1 · duedate 迁移）</div>
+    <div class="group-desc">V1 设想：把 duedate 的 IMAP 授权码拉取，迁进拾光签</div>
+  </div>
+
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">5.1 邮箱授权</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">邮箱拉取</div>
+          <div class="icons"><div class="nav-i">✕</div></div>
+        </div>
+        <div class="win-body" style="padding:12px;">
+          <div style="font-size:10px;font-weight:700;margin-bottom:6px;">📬 连接邮箱</div>
+          <div style="font-size:9px;color:#666;line-height:1.6;margin-bottom:8px;">
+            开启 QQ/163/126 邮箱的 IMAP 服务，
+            生成 16 位授权码后填入。
+          </div>
+          <div class="chat-input" style="margin-bottom:6px;">
+            <input placeholder="邮箱地址">
+          </div>
+          <div class="chat-input" style="margin-bottom:8px;">
+            <input placeholder="16 位授权码">
+          </div>
+          <button style="width:100%;padding:6px;border:1px solid #222;background:#222;color:#fff;border-radius:3px;font-size:10px;">
+            拉取未读邮件
+          </button>
+          <div style="font-size:8px;color:#999;margin-top:8px;line-height:1.5;">
+            授权码只在邮箱设置里显示一次，请妥善保存
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">填邮箱 + 授权码 → 拉取</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 5.2 未读邮件列表</span></div>
+        <div class="row"><span class="k">说明：</span><span class="v">IMAP + 授权码登录，duedate 已实现过</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（简化为手动粘贴到杂物堆）</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-name">5.2 未读邮件列表</span>
+        <span class="card-pos">V1</span>
+      </div>
+      <div class="screen">
+        <div class="win-titlebar"><span></span><span></span><span></span></div>
+        <div class="win-nav">
+          <div class="brand">📬 未读邮件</div>
+          <div class="icons"><div class="nav-i">✕</div></div>
+        </div>
+        <div class="win-body" style="padding:0;">
+          <div class="mail-item">
+            <div class="title">
+              <div>关于四史补考安排的通知</div>
+              <div class="from">教务处 · 9/27</div>
+            </div>
+            <span class="act">🔍 识别</span>
+          </div>
+          <div class="mail-item">
+            <div class="title">
+              <div>下周三考试，带学生证</div>
+              <div class="from">班级群 · 9/28</div>
+            </div>
+            <span class="act">🔍 识别</span>
+          </div>
+          <div class="mail-item">
+            <div class="title">
+              <div>关于开展期中教学检查的通知</div>
+              <div class="from">教务网 · 9/29</div>
+            </div>
+            <span class="act">🔍 识别</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="row"><span class="k">操作：</span><span class="v">点「识别」→ 解析出 DDL 草稿</span></div>
+        <div class="row"><span class="k">去向：</span><span class="v">→ 添加到日历 / 待办</span></div>
+        <div class="row"><span class="k">状态：</span><span class="v cut">已砍（同 5.1）</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ==================== 结尾说明 ==================== -->
+<div class="page-title" style="margin-top:32px;">
+  <h1>为什么 V1 全部砍掉</h1>
+  <p style="line-height:1.9;">
+    <b>1. 猫的动画做不出来。</b>猫要能跑、能睡、能互动，是养猫功能的核心体验。做不出来，整个功能就没有意义。<br>
+    <b>2. 工期太长。</b>社交、小组、周报、礼物、养猫、付费、邮箱拉取，全部实现至少需要数月，个人独立开发做不完。<br>
+    <b>3. 社交压力。</b>好友日程表可查看、点对点邀约，都会带来压力。砍掉后日程表改为完全私人，不做线上交友。<br>
+    <b>4. 邮箱拉取维护成本高。</b>IMAP 授权码能跑通，但多邮箱适配、授权码安全存储、邮件解析兼容性，维护成本高于价值。<br>
+    <br>
+    最终只保留三件事：<b>日历、待办、签筒</b>。把资源集中在能真正闭环的核心功能上。
+  </p>
+</div>
+
+</body>
+</html>
